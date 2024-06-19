@@ -10,6 +10,7 @@ type Instrument struct {
 	Kind                string  `json:"kind"`
 	IsActive            bool    `json:"is_active"`
 	InstrumentName      string  `json:"instrument_name"`
+	InstrumentType      string  `json:"instrument_type"`
 	ExpirationTimestamp int64   `json:"expiration_timestamp"`
 	CreationTimestamp   int64   `json:"creation_timestamp"`
 	ContractSize        float64 `json:"contract_size"`
