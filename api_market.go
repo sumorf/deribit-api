@@ -37,6 +37,11 @@ func (c *Client) GetIndex(params *models.GetIndexParams) (result models.GetIndex
 	return
 }
 
+func (c *Client) GetIndexPrice(params *models.GetIndexPriceParams) (result models.GetIndexPriceResponse, err error) {
+	err = c.Call("public/get_index_price", params, &result)
+	return
+}
+
 func (c *Client) GetInstruments(params *models.GetInstrumentsParams) (result []models.Instrument, err error) {
 	err = c.Call("public/get_instruments", params, &result)
 	return
