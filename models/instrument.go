@@ -16,4 +16,5 @@ type Instrument struct {
 	CreationTimestamp   int64   `json:"creation_timestamp"`
 	ContractSize        float64 `json:"contract_size"`
 	BaseCurrency        string  `json:"base_currency"`
+	SettlementCurrency  string  `json:"settlement_currency"`
 }
