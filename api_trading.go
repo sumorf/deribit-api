@@ -19,6 +19,11 @@ func (c *Client) Edit(params *models.EditParams) (result models.EditResponse, er
 	return
 }
 
+func (c *Client) EditByLabel(params *models.EditByLabelParams) (result models.EditResponse, err error) {
+	err = c.Call("private/edit_by_label", params, &result)
+	return
+}
+
 func (c *Client) Cancel(params *models.CancelParams) (result models.Order, err error) {
 	err = c.Call("private/cancel", params, &result)
 	return
