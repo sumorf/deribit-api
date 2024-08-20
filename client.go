@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
-	"github.com/frankrap/deribit-api/models"
+	"github.com/coinhako/deribit-api/models"
 	"github.com/sourcegraph/jsonrpc2"
 	"log"
 	"net/http"
