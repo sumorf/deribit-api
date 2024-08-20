@@ -9,8 +9,8 @@ V2 API Documentation: https://docs.deribit.com/v2/
 package main
 
 import (
-	"github.com/frankrap/deribit-api"
-	"github.com/frankrap/deribit-api/models"
+	"github.com/coinhako/deribit-api"
+	"github.com/coinhako/deribit-api/models"
 	"log"
 )
 
@@ -84,7 +84,7 @@ func main() {
 
 	// Subscribe
 	client.On("announcements", func(e *models.AnnouncementsNotification) {
-    
+
     })
     client.On("book.ETH-PERPETUAL.100.1.100ms", func(e *models.OrderBookGroupNotification) {
 
@@ -141,7 +141,7 @@ func main() {
     client.On("user.trades.future.BTC.100ms", func(e *models.UserTradesNotification) {
 
     })
-    
+
     client.Subscribe([]string{
         //"announcements",
         //"book.BTC-PERPETUAL.none.10.100ms",	// none/1,2,5,10,25,100,250

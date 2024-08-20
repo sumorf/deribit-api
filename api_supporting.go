@@ -1,6 +1,6 @@
 package deribit
 
-import "github.com/frankrap/deribit-api/models"
+import "github.com/coinhako/deribit-api/models"
 
 func (c *Client) GetTime() (result int64, err error) {
 	err = c.Call("public/get_time", nil, &result)

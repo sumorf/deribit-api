@@ -1,7 +1,7 @@
 package deribit
 
 import (
-	"github.com/frankrap/deribit-api/models"
+	"github.com/coinhako/deribit-api/models"
 )
 
 func (c *Client) SetHeartbeat(params *models.SetHeartbeatParams) (result string, err error) {
