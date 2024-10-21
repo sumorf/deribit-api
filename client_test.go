@@ -2,9 +2,10 @@ package deribit
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/frankrap/deribit-api/models"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func newClient() *Client {
@@ -133,6 +134,39 @@ func TestClient_Buy(t *testing.T) {
 		return
 	}
 	t.Logf("%#v", result)
+}
+
+func TestClient_CancelByLabel(t *testing.T) {
+	client := newClient()
+	params := &models.BuyParams{
+		InstrumentName: "BTC-PERPETUAL",
+		Amount:         10,
+		Price:          20000.0,
+		Type:           "limit",
+		Label:          "TestClient_CancelByLabel",
+	}
+	result, err := client.Buy(params)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	t.Logf("%#v", result)
+
+	cancelByLabelParams := &models.CancelByLabelParams{
+		Label: "TestClient_CancelByLabel",
+	}
+
+	cancelResult, err := client.CancelByLabel(cancelByLabelParams)
+	if err != nil {
+		t.Errorf("Cancel failed, %s", err)
+	}
+
+	if cancelResult <= 0 {
+		t.Errorf("Cancel order count should be greater than 0, actual=%d", cancelResult)
+	}
+
+	t.Logf("%#v", cancelResult)
 }
 
 func TestJsonOmitempty(t *testing.T) {
