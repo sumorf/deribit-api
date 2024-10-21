@@ -169,6 +169,56 @@ func TestClient_CancelByLabel(t *testing.T) {
 	t.Logf("%#v", cancelResult)
 }
 
+func TestClient_GetUserTradesByOrder(t *testing.T) {
+	client := newClient()
+	params := &models.BuyParams{
+		InstrumentName: "BTC-PERPETUAL",
+		Amount:         10,
+		Price:          20000.0,
+		Type:           "market",
+		Label:          "TestClient_CancelByLabel",
+	}
+	buyResult, err := client.Buy(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%#v", buyResult)
+
+	getTradesRes, err := client.GetUserTradesByOrder(&models.GetUserTradesByOrderParams{OrderID: buyResult.Order.OrderID})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if actualTradesCount := len(getTradesRes); actualTradesCount == 0 {
+		t.Errorf("no Trades")
+	}
+
+	if expectTradesCount, actualTradesCount := len(buyResult.Trades), len(getTradesRes); expectTradesCount != actualTradesCount {
+		t.Fatalf("Expected trades count %d, actual: %d", expectTradesCount, actualTradesCount)
+	}
+
+	for i, trade := range buyResult.Trades {
+		if trade.TradeSeq != getTradesRes[i].TradeSeq {
+			t.Errorf("Expected TradeSeq %d, actual %d", trade.TradeSeq, getTradesRes[i].TradeSeq)
+		}
+
+		if trade.TradeID != getTradesRes[i].TradeID {
+			t.Errorf("Expected TradeID %s, actual %s", trade.TradeID, getTradesRes[i].TradeID)
+		}
+
+		if trade.Amount != getTradesRes[i].Amount {
+			t.Errorf("Expected Amount %f, actual %f", trade.Amount, getTradesRes[i].Amount)
+		}
+
+		if trade.Price != getTradesRes[i].Price {
+			t.Errorf("Expected Price %f, actual %f", trade.Price, getTradesRes[i].Price)
+		}
+	}
+
+}
+
 func TestJsonOmitempty(t *testing.T) {
 	params := &models.BuyParams{
 		InstrumentName: "BTC-PERPETUAL",
