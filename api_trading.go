@@ -104,7 +104,7 @@ func (c *Client) GetUserTradesByInstrumentAndTime(params *models.GetUserTradesBy
 	return
 }
 
-func (c *Client) GetUserTradesByOrder(params *models.GetUserTradesByOrderParams) (result models.GetUserTradesResponse, err error) {
+func (c *Client) GetUserTradesByOrder(params *models.GetUserTradesByOrderParams) (result []models.Trade, err error) {
 	err = c.Call("private/get_user_trades_by_order", params, &result)
 	return
 }
