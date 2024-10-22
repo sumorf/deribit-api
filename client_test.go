@@ -38,6 +38,44 @@ func TestClient_Test(t *testing.T) {
 	t.Logf("%v", result)
 }
 
+func TestClient_GetInstruments_spot(t *testing.T) {
+	client := newClient()
+	instruments, err := client.GetInstruments(&models.GetInstrumentsParams{Currency: "BTC", Kind: "spot"})
+	assert.Nil(t, err)
+	assert.True(t, len(instruments) > 0, "No instrument gotten")
+	for _, instrument := range instruments {
+		assert.NotEmpty(t, instrument.InstrumentName)
+		assert.NotEmpty(t, instrument.BaseCurrency)
+		assert.NotEmpty(t, instrument.ContractSize)
+		assert.NotEmpty(t, instrument.InstrumentType)
+		assert.NotEmpty(t, instrument.CounterCurrency)
+		assert.NotEmpty(t, instrument.CreationTimestamp)
+		assert.NotEmpty(t, instrument.ExpirationTimestamp)
+		assert.NotEmpty(t, instrument.Kind)
+		assert.Truef(t, instrument.CounterCurrency == "BTC" || instrument.BaseCurrency == "BTC", "%+v", instrument)
+		assert.Equal(t, instrument.Kind, "spot")
+	}
+}
+
+func TestClient_GetInstruments_future(t *testing.T) {
+	client := newClient()
+	instruments, err := client.GetInstruments(&models.GetInstrumentsParams{Currency: "BTC", Kind: "future"})
+	assert.Nil(t, err)
+	assert.True(t, len(instruments) > 0, "No instrument gotten")
+	for _, instrument := range instruments {
+		assert.NotEmpty(t, instrument.InstrumentName)
+		assert.NotEmpty(t, instrument.BaseCurrency)
+		assert.NotEmpty(t, instrument.ContractSize)
+		assert.NotEmpty(t, instrument.InstrumentType)
+		assert.NotEmpty(t, instrument.CounterCurrency)
+		assert.NotEmpty(t, instrument.CreationTimestamp)
+		assert.NotEmpty(t, instrument.ExpirationTimestamp)
+		assert.NotEmpty(t, instrument.Kind)
+		assert.Truef(t, instrument.CounterCurrency == "BTC" || instrument.BaseCurrency == "BTC", "%+v", instrument)
+		assert.Equal(t, instrument.Kind, "future")
+	}
+}
+
 func TestClient_GetBookSummaryByCurrency(t *testing.T) {
 	client := newClient()
 	params := &models.GetBookSummaryByCurrencyParams{
