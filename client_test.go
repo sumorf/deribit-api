@@ -2,6 +2,7 @@ package deribit
 
 import (
 	"encoding/json"
+	"math/rand"
 	"testing"
 
 	"github.com/frankrap/deribit-api/models"
@@ -217,6 +218,51 @@ func TestClient_GetUserTradesByOrder(t *testing.T) {
 		}
 	}
 
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func TestClient_GetOrderByLabel(t *testing.T) {
+	client := newClient()
+	orderLabel := "TestClient_GetOrderByLabel" + randSeq(6)
+	params := &models.BuyParams{
+		InstrumentName: "BTC-PERPETUAL",
+		Amount:         10,
+		Price:          20000.0,
+		Type:           "limit",
+		Label:          orderLabel,
+	}
+	newOrder, err := client.Buy(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fetchedOrders, err := client.GetOrderStateByLabel(&models.GetOrderStateByLabelParams{Label: orderLabel, Currency: "BTC"})
+	if err != nil {
+		t.Error(err)
+	} else {
+		if len(fetchedOrders) == 0 {
+			t.Error("Count of fetchedOrders is equal to 0.")
+		} else {
+			lastOrder := fetchedOrders[len(fetchedOrders)-1]
+			if lastOrder.OrderID != newOrder.Order.OrderID {
+				t.Errorf("fetchedOrder OrderID != new OrderID, %s <> %s", lastOrder.OrderID, newOrder.Order.OrderID)
+			}
+		}
+	}
+
+	cancelResult, err := client.CancelByLabel(&models.CancelByLabelParams{Label: orderLabel, Currency: "BTC"})
+	if err != nil {
+		t.Fatal(err, cancelResult)
+	}
 }
 
 func TestJsonOmitempty(t *testing.T) {
