@@ -70,8 +70,10 @@ func TestClient_GetInstruments_future(t *testing.T) {
 		assert.NotEmpty(t, instrument.CounterCurrency)
 		assert.NotEmpty(t, instrument.CreationTimestamp)
 		assert.NotEmpty(t, instrument.ExpirationTimestamp)
+		assert.NotEmpty(t, instrument.SettlementCurrency)
 		assert.NotEmpty(t, instrument.Kind)
 		assert.Truef(t, instrument.CounterCurrency == "BTC" || instrument.BaseCurrency == "BTC", "%+v", instrument)
+		assert.Truef(t, instrument.SettlementCurrency == "BTC", "%+v", instrument)
 		assert.Equal(t, instrument.Kind, "future")
 	}
 }
