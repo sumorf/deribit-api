@@ -108,7 +108,7 @@ func TestClient_BuyMarket(t *testing.T) {
 	params := &models.BuyParams{
 		InstrumentName: "BTC-PERPETUAL",
 		Amount:         10,
-		Price:          0,
+		Price:          float64Pointer(0),
 		Type:           "market",
 	}
 	result, err := client.Buy(params)
@@ -124,7 +124,7 @@ func TestClient_Buy(t *testing.T) {
 	params := &models.BuyParams{
 		InstrumentName: "BTC-PERPETUAL",
 		Amount:         40,
-		Price:          6000.0,
+		Price:          Float64Pointer(6000),
 		Type:           "limit",
 	}
 	result, err := client.Buy(params)
@@ -249,4 +249,8 @@ func TestUnmarshalOrderBookNotification(t *testing.T) {
 	for _, v := range notification.Bids {
 		t.Logf("Bid: %#v", v)
 	}
+}
+
+func float64Pointer(value float64) *float64 {
+	return &value
 }
