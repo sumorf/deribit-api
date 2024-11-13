@@ -2,7 +2,7 @@ package deribit
 
 import (
 	"encoding/json"
-	"github.com/frankrap/deribit-api/models"
+	"github.com/coinhako/deribit-api/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
