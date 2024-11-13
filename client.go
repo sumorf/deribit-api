@@ -5,15 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chuckpreslar/emission"
-	"github.com/coinhako/deribit-api/models"
-	"github.com/sourcegraph/jsonrpc2"
 	"log"
 	"net/http"
-	"nhooyr.io/websocket"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/chuckpreslar/emission"
+	"github.com/sourcegraph/jsonrpc2"
+	"nhooyr.io/websocket"
+
+	"github.com/coinhako/deribit-api/models"
 )
 
 const (
@@ -25,9 +27,7 @@ const (
 	MaxTryTimes = 10000
 )
 
-var (
-	ErrAuthenticationIsRequired = errors.New("authentication is required")
-)
+var ErrAuthenticationIsRequired = errors.New("authentication is required")
 
 // Event is wrapper of received event
 type Event struct {
@@ -147,6 +147,7 @@ func (c *Client) subscribe(channels []string) {
 func (c *Client) start() error {
 	c.setIsConnected(false)
 	c.subscriptionsMap = make(map[string]struct{})
+	c.subscriptions = make([]string, 0)
 	c.conn = nil
 	c.rpcConn = nil
 	c.heartCancel = make(chan struct{})
@@ -219,13 +220,13 @@ func (c *Client) Call(method string, params interface{}, result interface{}) (er
 
 // Handle implements jsonrpc2.Handler
 func (c *Client) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
-	//log.Printf("Handle %v", req.Method)
+	// log.Printf("Handle %v", req.Method)
 	if req.Method == "subscription" {
 		// update events
 		if req.Params != nil && len(*req.Params) > 0 {
 			var event Event
 			if err := json.Unmarshal(*req.Params, &event); err != nil {
-				//c.setError(err)
+				// c.setError(err)
 				return
 			}
 			c.subscriptionsProcess(&event)
@@ -261,7 +262,7 @@ func (c *Client) reconnect() {
 
 func (c *Client) connect() (*websocket.Conn, *http.Response, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	//defer cancel()
+	// defer cancel()
 	conn, resp, err := websocket.Dial(ctx, c.addr, &websocket.DialOptions{})
 	if err == nil {
 		conn.SetReadLimit(32768 * 64)
