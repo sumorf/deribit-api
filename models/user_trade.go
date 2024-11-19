@@ -18,4 +18,5 @@ type UserTrade struct {
 	Fee            float64     `json:"fee"`
 	Direction      string      `json:"direction"`
 	Amount         float64     `json:"amount"`
+	Label          string      `json:"label"`
 }

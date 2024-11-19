@@ -39,6 +39,11 @@ func (c *Client) CancelAllByInstrument(params *models.CancelAllByInstrumentParam
 	return
 }
 
+func (c *Client) CancelByLabel(params *models.CancelByLabelParams) (result int, err error) {
+	err = c.Call("private/cancel_by_label", params, &result)
+	return
+}
+
 func (c *Client) ClosePosition(params *models.ClosePositionParams) (result models.ClosePositionResponse, err error) {
 	err = c.Call("private/close_position", params, &result)
 	return
@@ -79,6 +84,11 @@ func (c *Client) GetOrderState(params *models.GetOrderStateParams) (result model
 	return
 }
 
+func (c *Client) GetOrderStateByLabel(params *models.GetOrderStateByLabelParams) (result []models.Order, err error) {
+	err = c.Call("/private/get_order_state_by_label", params, &result)
+	return
+}
+
 func (c *Client) GetStopOrderHistory(params *models.GetStopOrderHistoryParams) (result models.GetStopOrderHistoryResponse, err error) {
 	err = c.Call("private/get_stop_order_history", params, &result)
 	return
@@ -104,7 +114,7 @@ func (c *Client) GetUserTradesByInstrumentAndTime(params *models.GetUserTradesBy
 	return
 }
 
-func (c *Client) GetUserTradesByOrder(params *models.GetUserTradesByOrderParams) (result models.GetUserTradesResponse, err error) {
+func (c *Client) GetUserTradesByOrder(params *models.GetUserTradesByOrderParams) (result []models.Trade, err error) {
 	err = c.Call("private/get_user_trades_by_order", params, &result)
 	return
 }

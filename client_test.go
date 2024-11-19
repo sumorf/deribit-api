@@ -2,9 +2,11 @@ package deribit
 
 import (
 	"encoding/json"
+	"math/rand"
+	"testing"
+
 	"github.com/frankrap/deribit-api/models"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func newClient() *Client {
@@ -34,6 +36,46 @@ func TestClient_Test(t *testing.T) {
 	result, err := client.Test()
 	assert.Nil(t, err)
 	t.Logf("%v", result)
+}
+
+func TestClient_GetInstruments_spot(t *testing.T) {
+	client := newClient()
+	instruments, err := client.GetInstruments(&models.GetInstrumentsParams{Currency: "BTC", Kind: "spot"})
+	assert.Nil(t, err)
+	assert.True(t, len(instruments) > 0, "No instrument gotten")
+	for _, instrument := range instruments {
+		assert.NotEmpty(t, instrument.InstrumentName)
+		assert.NotEmpty(t, instrument.BaseCurrency)
+		assert.NotEmpty(t, instrument.ContractSize)
+		assert.NotEmpty(t, instrument.InstrumentType)
+		assert.NotEmpty(t, instrument.CounterCurrency)
+		assert.NotEmpty(t, instrument.CreationTimestamp)
+		assert.NotEmpty(t, instrument.ExpirationTimestamp)
+		assert.NotEmpty(t, instrument.Kind)
+		assert.Truef(t, instrument.CounterCurrency == "BTC" || instrument.BaseCurrency == "BTC", "%+v", instrument)
+		assert.Equal(t, instrument.Kind, "spot")
+	}
+}
+
+func TestClient_GetInstruments_future(t *testing.T) {
+	client := newClient()
+	instruments, err := client.GetInstruments(&models.GetInstrumentsParams{Currency: "BTC", Kind: "future"})
+	assert.Nil(t, err)
+	assert.True(t, len(instruments) > 0, "No instrument gotten")
+	for _, instrument := range instruments {
+		assert.NotEmpty(t, instrument.InstrumentName)
+		assert.NotEmpty(t, instrument.BaseCurrency)
+		assert.NotEmpty(t, instrument.ContractSize)
+		assert.NotEmpty(t, instrument.InstrumentType)
+		assert.NotEmpty(t, instrument.CounterCurrency)
+		assert.NotEmpty(t, instrument.CreationTimestamp)
+		assert.NotEmpty(t, instrument.ExpirationTimestamp)
+		assert.NotEmpty(t, instrument.SettlementCurrency)
+		assert.NotEmpty(t, instrument.Kind)
+		assert.Truef(t, instrument.CounterCurrency == "BTC" || instrument.BaseCurrency == "BTC", "%+v", instrument)
+		assert.Truef(t, instrument.SettlementCurrency == "BTC", "%+v", instrument)
+		assert.Equal(t, instrument.Kind, "future")
+	}
 }
 
 func TestClient_GetBookSummaryByCurrency(t *testing.T) {
@@ -133,6 +175,134 @@ func TestClient_Buy(t *testing.T) {
 		return
 	}
 	t.Logf("%#v", result)
+}
+
+func TestClient_CancelByLabel(t *testing.T) {
+	client := newClient()
+	params := &models.BuyParams{
+		InstrumentName: "BTC-PERPETUAL",
+		Amount:         10,
+		Price:          20000.0,
+		Type:           "limit",
+		Label:          "TestClient_CancelByLabel",
+	}
+	result, err := client.Buy(params)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	t.Logf("%#v", result)
+
+	cancelByLabelParams := &models.CancelByLabelParams{
+		Label: "TestClient_CancelByLabel",
+	}
+
+	cancelResult, err := client.CancelByLabel(cancelByLabelParams)
+	if err != nil {
+		t.Errorf("Cancel failed, %s", err)
+	}
+
+	if cancelResult <= 0 {
+		t.Errorf("Cancel order count should be greater than 0, actual=%d", cancelResult)
+	}
+
+	t.Logf("%#v", cancelResult)
+}
+
+func TestClient_GetUserTradesByOrder(t *testing.T) {
+	client := newClient()
+	params := &models.BuyParams{
+		InstrumentName: "BTC-PERPETUAL",
+		Amount:         10,
+		Price:          20000.0,
+		Type:           "market",
+		Label:          "TestClient_CancelByLabel",
+	}
+	buyResult, err := client.Buy(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%#v", buyResult)
+
+	getTradesRes, err := client.GetUserTradesByOrder(&models.GetUserTradesByOrderParams{OrderID: buyResult.Order.OrderID})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if actualTradesCount := len(getTradesRes); actualTradesCount == 0 {
+		t.Errorf("no Trades")
+	}
+
+	if expectTradesCount, actualTradesCount := len(buyResult.Trades), len(getTradesRes); expectTradesCount != actualTradesCount {
+		t.Fatalf("Expected trades count %d, actual: %d", expectTradesCount, actualTradesCount)
+	}
+
+	for i, trade := range buyResult.Trades {
+		if trade.TradeSeq != getTradesRes[i].TradeSeq {
+			t.Errorf("Expected TradeSeq %d, actual %d", trade.TradeSeq, getTradesRes[i].TradeSeq)
+		}
+
+		if trade.TradeID != getTradesRes[i].TradeID {
+			t.Errorf("Expected TradeID %s, actual %s", trade.TradeID, getTradesRes[i].TradeID)
+		}
+
+		if trade.Amount != getTradesRes[i].Amount {
+			t.Errorf("Expected Amount %f, actual %f", trade.Amount, getTradesRes[i].Amount)
+		}
+
+		if trade.Price != getTradesRes[i].Price {
+			t.Errorf("Expected Price %f, actual %f", trade.Price, getTradesRes[i].Price)
+		}
+	}
+
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func TestClient_GetOrderByLabel(t *testing.T) {
+	client := newClient()
+	orderLabel := "TestClient_GetOrderByLabel" + randSeq(6)
+	params := &models.BuyParams{
+		InstrumentName: "BTC-PERPETUAL",
+		Amount:         10,
+		Price:          20000.0,
+		Type:           "limit",
+		Label:          orderLabel,
+	}
+	newOrder, err := client.Buy(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fetchedOrders, err := client.GetOrderStateByLabel(&models.GetOrderStateByLabelParams{Label: orderLabel, Currency: "BTC"})
+	if err != nil {
+		t.Error(err)
+	} else {
+		if len(fetchedOrders) == 0 {
+			t.Error("Count of fetchedOrders is equal to 0.")
+		} else {
+			lastOrder := fetchedOrders[len(fetchedOrders)-1]
+			if lastOrder.OrderID != newOrder.Order.OrderID {
+				t.Errorf("fetchedOrder OrderID != new OrderID, %s <> %s", lastOrder.OrderID, newOrder.Order.OrderID)
+			}
+		}
+	}
+
+	cancelResult, err := client.CancelByLabel(&models.CancelByLabelParams{Label: orderLabel, Currency: "BTC"})
+	if err != nil {
+		t.Fatal(err, cancelResult)
+	}
 }
 
 func TestJsonOmitempty(t *testing.T) {
